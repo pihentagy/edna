@@ -59,6 +59,7 @@
     noteExists,
     kEdnaFileExt,
     rememberOpenedNote,
+    appendToNote,
   } from "../notes";
   import {
     getNoteMeta,
@@ -1800,15 +1801,17 @@
   /**
    * @param {string} name
    */
-  function onMoveBlockToNote(name) {
+  async function onMoveBlockToNote(name) {
     showingBlockMoveSelector = false;
-  }
-
-  /**
-   * @param {string} name
-   */
-  async function onMoveBlockToNewNote(name) {
-    showingBlockMoveSelector = false;
+    // name can be new or existing note
+    let state = getEditorView().state;
+    let block = getActiveNoteBlock(state);
+    let delim = state.sliceDoc(block.delimiter.from, block.delimiter.to);
+    let content = state.sliceDoc(block.content.from, block.content.to);
+    await appendToNote(name, delim + content);
+    let view = getEditorView();
+    deleteBlock(view);
+    view.focus();
   }
 
   /**
@@ -1967,7 +1970,7 @@
       header="Move current block to note:"
       forMoveBlock={true}
       openNote={onMoveBlockToNote}
-      createNote={onMoveBlockToNewNote}
+      createNote={onMoveBlockToNote}
     />
   </Overlay>
 {/if}

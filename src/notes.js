@@ -556,6 +556,10 @@ export function getLatestNoteNames() {
   return latestNoteNames;
 }
 
+export function startsWithBlockHeader(s) {
+  return s.startsWith("\n∞∞∞");
+}
+
 // in case somehow a note doesn't start with the block header, fix it up
 export function fixUpNoteContent(s) {
   // console.log("fixUpNote:", content)
@@ -639,9 +643,10 @@ export async function saveCurrentNote(content) {
     incNoteSaveCount();
     return;
   }
-  let path = notePathFromName(name);
+
   let dh = getStorageFS();
   if (!dh) {
+    let path = notePathFromNameLS(name);
     localStorage.setItem(path, content);
   } else {
     await writeMaybeEncryptedFS(dh, name, content);
@@ -676,6 +681,44 @@ export async function createNoteWithName(name, content = null) {
   await writeNoteFS(dh, name, content);
   incNoteCreateCount();
   await loadNoteNames();
+}
+
+/*
+ * @param {string} name
+ * @param {string} content
+ * @returns {Promise<void>}
+ */
+export async function appendToNote(name, content) {
+  throwIf(
+    !startsWithBlockHeader(content),
+    "content must start with block header ~~~",
+  );
+
+  let dh = getStorageFS();
+  if (!dh) {
+    let path = notePathFromName(name);
+    let v = localStorage.getItem(path);
+    if (v === null) {
+      console.log("created new ls note", name, path);
+      incNoteCreateCount();
+    } else {
+      console.log("appended to existing ls note", name, path);
+      incNoteSaveCount();
+    }
+    let newContent = (v || "") + content;
+    localStorage.setItem(path, newContent);
+    return;
+  }
+
+  let newContent = content;
+  if (noteExists(name)) {
+    let oldContent = await loadNote(name);
+    newContent = content + oldContent;
+    incNoteSaveCount();
+  } else {
+    incNoteCreateCount();
+  }
+  await writeMaybeEncryptedFS(dh, name, newContent);
 }
 
 /**
