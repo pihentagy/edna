@@ -151,3 +151,7 @@ select {
 .cm-taskmarker-toggle {
   font-family: ui-monospace;
 }
+
+.hili {
+  @apply bg-yellow-200;
+}

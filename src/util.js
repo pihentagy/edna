@@ -436,3 +436,24 @@ export function renameLS(oldName, newName) {
 export function noOp() {
   // do nothing
 }
+
+/**
+ * @param {string} filter
+ * @returns {RegExp}
+ */
+export function makeHilightRegExp(filter) {
+  let parts = filter.split(" ");
+  let a = [];
+  for (let s of parts) {
+    s = s.trim().toLowerCase();
+    let escaped = s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    a.push(escaped);
+  }
+  let s = a.join("|");
+  return new RegExp(`(${s})`, "gi");
+}
+
+export function hilightText(s, regexp) {
+  // console.log("hilightText:", s, regexp);
+  return s.replace(regexp, '<span class="hili">$1</span>');
+}

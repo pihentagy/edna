@@ -5,7 +5,14 @@
     sanitizeNoteName,
   } from "../notes";
   import { reassignNoteShortcut, toggleNoteStarred } from "../metadata";
-  import { findMatchingItems, getAltChar, isAltNumEvent, len } from "../util";
+  import {
+    findMatchingItems,
+    getAltChar,
+    hilightText,
+    isAltNumEvent,
+    len,
+    makeHilightRegExp,
+  } from "../util";
   import { focus } from "../actions";
   import ListBox from "./ListBox.svelte";
   import IconStar from "./IconStar.svelte";
@@ -27,6 +34,7 @@
   let noteNames = getLatestNoteNames();
   let items = $state(buildItems(noteNames));
   let filter = $state("");
+  let hiliRegExp = $derived(makeHilightRegExp(filter));
   let altChar = $state(getAltChar());
 
   function reloadNotes() {
@@ -257,6 +265,7 @@
     onclick={(item) => emitOpenNote(item)}
   >
     {#snippet renderItem(item)}
+      {@const hili = hilightText(item.name, hiliRegExp)}
       <button
         class="ml-[-6px]"
         onclick={(ev) => {
@@ -267,7 +276,7 @@
         ><IconStar fill={item.isStarred ? "yellow" : "none"}></IconStar></button
       >
       <div class="ml-2 truncate {sysNoteCls(item) ? 'italic' : ''}">
-        {item.name}
+        {@html hili}
       </div>
       <div class="grow"></div>
       <div class="ml-4 mr-2 text-xs text-gray-400 whitespace-nowrap">

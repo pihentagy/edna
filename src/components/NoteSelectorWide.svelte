@@ -5,7 +5,14 @@
     kScratchNoteName,
     sanitizeNoteName,
   } from "../notes";
-  import { findMatchingItems, getAltChar, isAltNumEvent, len } from "../util";
+  import {
+    findMatchingItems,
+    getAltChar,
+    hilightText,
+    isAltNumEvent,
+    len,
+    makeHilightRegExp,
+  } from "../util";
   import { focus } from "../actions";
   import ListBox2 from "./ListBox2.svelte";
   import { reassignNoteShortcut, toggleNoteStarred } from "../metadata";
@@ -32,6 +39,7 @@
   let noteNames = getLatestNoteNames();
   let items = $state(buildItems(noteNames));
   let filter = $state("");
+  let hiliRegExp = $derived(makeHilightRegExp(filter));
   let altChar = getAltChar();
 
   let sanitizedFilter = $derived.by(() => {
@@ -246,10 +254,11 @@
     onclick={(item) => emitOpenNote(item)}
   >
     {#snippet renderItem(item)}
+      {@const hili = hilightText(item.name, hiliRegExp)}
       {#if item.isStarred}
         <IconStar class="inline-block mt-[-3px]" fill="yellow"></IconStar>
       {/if}
-      {item.name}
+      {@html hili}
       <span class="ml-0.5 text-xs text-gray-400 whitespace-nowrap"
         >{noteShortcut(item)}</span
       >
