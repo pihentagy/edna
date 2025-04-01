@@ -179,7 +179,7 @@
   });
 
   function selectionChanged(item, idx) {
-    // console.log("selectionChanged:", item, idx);
+    // console.log("selectionChanged:", $state.snapshot(item), idx);
     selectedItem = item;
     selectedName = item ? selectedItem.name : "";
     canOpenSelected = !!selectedItem;

@@ -81,9 +81,6 @@
       }
       return;
     }
-    if (n === selectedIdx) {
-      return;
-    }
     selectedIdx = 0;
     if (n >= 0 && n < nItems) {
       selectedIdx = n;
